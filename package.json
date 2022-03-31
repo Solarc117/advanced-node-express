@@ -5,7 +5,10 @@
   "name": "fcc-advanced-node-and-express",
   "author": "http://github.com/JosephLivengood",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "Node and Express Chat Application from fCC curriculum",
+  "engines": {
+    "node": "v16.3.0"
+  },
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
