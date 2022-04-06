@@ -25,6 +25,9 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
+passport.serializeUser((user, done) => done(null, user._id))
+passport.deserializeUser((_id, done) => done(null, null))
+
 app.route('/').get((req, res) => {
   // res.render('pug/index.pug') // ✅
   // res.render('./pug/index.pug') // ✅
