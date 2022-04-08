@@ -41,11 +41,26 @@ app.route('/').get((req, res) => {
   }) // ✅
 })
 
-passport.serializeUser((user, done) => done(null, user._id))
-passport.deserializeUser((id, done) => {
-  // myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-  done(null, null)
-  // })
+myDB(async client => {
+  const dataBase = await client.db('database').collection('users')
+
+  // Be sure to change the title.
+  app.route('/').get((req, res) => {
+    // Change the response to render the Pug template.
+    res.render('pug', {
+      title: 'Connected to Database',
+      message: 'Please login',
+    })
+  })
+
+  passport.serializeUser((user, done) => done(null, user._id))
+  passport.deserializeUser((id, done) =>
+    dataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => done(null, doc))
+  )
+}).catch(err => {
+  app.route('/').get((req, res) => {
+    res.render('pug', { title: err, message: 'Unable to login' })
+  })
 })
 
 const PORT = process.env.PORT || 3000
