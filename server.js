@@ -8,7 +8,6 @@ const express = require('express'),
   mDB = require('mongodb')
 
 const app = express()
-
 app.set('view engine', 'pug')
 
 fccTesting(app) // For FCC testing purposes.
@@ -26,10 +25,6 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
-const ObjectID = mDB.ObjectID
-passport.serializeUser((user, done) => done(null, user.id))
-passport.deserializeUser((id, done) => done(null, null))
-
 app.route('/').get((req, res) => {
   // res.render('pug/index.pug') // ✅
   // res.render('./pug/index.pug') // ✅
@@ -45,6 +40,10 @@ app.route('/').get((req, res) => {
     message: 'Please login',
   }) // ✅
 })
+
+const ObjectID = mDB.ObjectID
+passport.serializeUser((user, done) => done(null, user.id))
+passport.deserializeUser((id, done) => done(null, null))
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log('Listening on port ' + PORT))
