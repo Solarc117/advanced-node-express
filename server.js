@@ -6,7 +6,7 @@ const express = require('express'),
   session = require('express-session'),
   passport = require('passport'),
   ObjectID = require('mongodb').ObjectID,
-  LocalStrat = require('passport-local')
+  LocalStrategy = require('passport-local')
 
 const app = express()
 app.set('view engine', 'pug')
@@ -27,7 +27,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 myDB(async client => {
-  const dataBase = await client.db('database').collection('users')
+  const myDataBase = await client.db('database').collection('users')
 
   // Be sure to change the title.
   app.route('/').get((req, res) =>
@@ -40,11 +40,11 @@ myDB(async client => {
 
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
-    dataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => done(null, doc))
+    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => done(null, doc))
   )
   passport.use(
-    new LocalStrat((username, password, done) =>
-      dataBase.findOne({ username: username }, (err, user) => {
+    new LocalStrategy((username, password, done) =>
+      myDataBase.findOne({ username: username }, (err, user) => {
         console.log(`User ${username} attempted to log in.`)
 
         return err
