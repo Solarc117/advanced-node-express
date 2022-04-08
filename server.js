@@ -1,11 +1,11 @@
 'use strict'
 require('dotenv').config()
 const express = require('express'),
-  // myDB = require('./connection'),
+  myDB = require('./connection'),
   fccTesting = require('./freeCodeCamp/fcctesting.js'),
   session = require('express-session'),
   passport = require('passport'),
-  mDB = require('mongodb')
+  ObjectID = require('mongodb').ObjectID
 
 const app = express()
 app.set('view engine', 'pug')
@@ -41,9 +41,12 @@ app.route('/').get((req, res) => {
   }) // ✅
 })
 
-const ObjectID = mDB.ObjectID
 passport.serializeUser((user, done) => done(null, user.id))
-passport.deserializeUser((id, done) => done(null, null))
+passport.deserializeUser((id, done) => {
+  // myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+  done(null, null)
+  // })
+})
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log('Listening on port ' + PORT))
