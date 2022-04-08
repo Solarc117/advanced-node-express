@@ -44,7 +44,7 @@ myDB(async client => {
   )
   passport.use(
     new LocalStrat((username, password, done) =>
-      myDB.findOne({ username: username }, (err, user) => {
+      dataBase.findOne({ username: username }, (err, user) => {
         console.log(`User ${username} attempted to log in.`)
 
         return err
