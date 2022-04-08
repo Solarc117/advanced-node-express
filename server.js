@@ -5,7 +5,8 @@ const express = require('express'),
   fccTesting = require('./freeCodeCamp/fcctesting.js'),
   session = require('express-session'),
   passport = require('passport'),
-  ObjectID = require('mongodb').ObjectID
+  ObjectID = require('mongodb').ObjectID,
+  LocalStrat = require('passport-local')
 
 const app = express()
 app.set('view engine', 'pug')
@@ -40,6 +41,19 @@ myDB(async client => {
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
     dataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => done(null, doc))
+  )
+  passport.use(
+    new LocalStrat((username, password, done) =>
+      myDB.findOne({ username: username }, (err, user) => {
+        console.log(`User ${username} attempted to log in.`)
+
+        return err
+          ? done(err)
+          : !user || password !== user.password
+          ? done(null, false)
+          : done(null, user)
+      })
+    )
   )
 }).catch(err => {
   app.route('/').get((req, res) => {
