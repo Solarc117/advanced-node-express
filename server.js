@@ -25,33 +25,17 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.route('/').get((req, res) => {
-  // res.render('pug/index.pug') // ✅
-  // res.render('./pug/index.pug') // ✅
-  // res.render('pug/index.pug') // ✅
-  // res.render('./pug/index') // ✅
-  // res.render('/pug/index') // ❌
-  // res.render('pug/index') // ✅
-  // res.render('./pug/') // ✅
-  // res.render('/pug/') // ❌
-  // res.render('pug/') // ✅
-  res.render('pug', {
-    title: 'Hello',
-    message: 'Please login',
-  }) // ✅
-})
-
 myDB(async client => {
   const dataBase = await client.db('database').collection('users')
 
   // Be sure to change the title.
-  app.route('/').get((req, res) => {
+  app.route('/').get((req, res) =>
     // Change the response to render the Pug template.
     res.render('pug', {
       title: 'Connected to Database',
       message: 'Please login',
     })
-  })
+  )
 
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
