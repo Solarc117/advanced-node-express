@@ -26,6 +26,11 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) next()
+  else res.redirect('/')
+}
+
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
@@ -45,7 +50,7 @@ myDB(async client => {
     }
   )
 
-  app.get('/profile', (req, res) => res.render('pug/profile'))
+  app.get('/profile', ensureAuthenticated, (req, res) => res.render('pug/profile'))
 
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
