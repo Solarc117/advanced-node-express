@@ -29,20 +29,31 @@ app.use(passport.session())
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
-  // Be sure to change the title.
-  app.route('/').get((req, res) =>
-    // Change the response to render the Pug template.
+  app.get('/', (req, res) =>
     res.render('pug', {
       title: 'Connected to Database',
       message: 'Please login',
+      showLogin: true,
     })
   )
 
+  app.post(
+    '/login',
+    passport.authenticate('local', { failureRedirect: '/' }),
+    (req, res) => {
+      res.redirect('/profile')
+    }
+  )
+
+  app.get('/profile', (req, res) => res.render('pug/profile'))
+
+  // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
     myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => done(null, doc))
   )
   passport.use(
+    // @ts-ignore
     new LocalStrategy((username, password, done) =>
       myDataBase.findOne({ username: username }, (err, user) => {
         console.log(`User ${username} attempted to log in.`)
@@ -56,9 +67,9 @@ myDB(async client => {
     )
   )
 }).catch(err => {
-  app.route('/').get((req, res) => {
+  app.get('/', (req, res) =>
     res.render('pug', { title: err, message: 'Unable to login' })
-  })
+  )
 })
 
 const PORT = process.env.PORT || 3000
