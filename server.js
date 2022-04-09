@@ -50,7 +50,10 @@ myDB(async client => {
     }
   )
 
-  app.get('/profile', ensureAuthenticated, (req, res) => res.render('pug/profile'))
+  // @ts-ignore
+  app.get('/profile', ensureAuthenticated, (req, res) =>
+    res.render('pug/profile', { username: req.user.username })
+  )
 
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
