@@ -42,6 +42,11 @@ myDB(async client => {
     })
   )
 
+  app.get('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/')
+  })
+
   app.post(
     '/login',
     passport.authenticate('local', { failureRedirect: '/' }),
@@ -50,10 +55,12 @@ myDB(async client => {
     }
   )
 
-  // @ts-ignore
   app.get('/profile', ensureAuthenticated, (req, res) =>
+    // @ts-ignore
     res.render('pug/profile', { username: req.user.username })
   )
+
+  app.use((req, res, next) => res.status(404).type('text').send('Not Found'))
 
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
