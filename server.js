@@ -34,7 +34,7 @@ function ensureAuthenticated(req, res, next) {
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
-  app.get('/', (req, res) =>
+  app.route('/').get((req, res) =>
     res.render('pug', {
       title: 'Connected to Database',
       message: 'Please login',
@@ -43,19 +43,19 @@ myDB(async client => {
     })
   )
 
-  app.get('/logout', (req, res) => {
+  app.route('/logout').get((req, res) => {
     req.logout()
     res.redirect('/')
   })
 
-  app.post(
-    '/login',
-    passport.authenticate('local', { failureRedirect: '/' }),
-    (req, res) => res.redirect('/profile')
-  )
+  app
+    .route('/login')
+    .post(
+      passport.authenticate('local', { failureRedirect: '/' }),
+      (req, res) => res.redirect('/profile')
+    )
 
-  app.post(
-    '/register',
+  app.route('/register').post(
     (req, res, next) => {
       const { username, password } = req.body
       // The logic of the registration route should be as follows: Register the new user > Authenticate the new user > Redirect to /profile
@@ -79,7 +79,7 @@ myDB(async client => {
     (req, res, next) => res.redirect('/profile')
   )
 
-  app.get('/profile', ensureAuthenticated, (req, res) =>
+  app.route('/profile').get(ensureAuthenticated, (req, res) =>
     // @ts-ignore
     res.render('pug/profile', { username: req.user.username })
   )
