@@ -64,7 +64,7 @@ myDB(async client => {
       // a) Query database with a findOne command:
       // i) if user is returned then it exists and redirect back to home
       // ii) if user is undefined and no error occurs then 'insertOne' into the database with the username and password, and, as long as no errors occur, call next to go to step 2, authenticating the new user, which we've already written the logic for in our POST /login route.
-      return myDataBase.findOne({ username }, (err, existingUser) => {
+      myDataBase.findOne({ username }, (err, existingUser) => {
         return err
           ? next(err)
           : existingUser
@@ -89,7 +89,9 @@ myDB(async client => {
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
-    myDataBase.findOne({ _id: new ObjectID(id) }, (_, doc) => done(null, doc))
+    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) =>
+      err ? console.error(err) : done(null, doc)
+    )
   )
   passport.use(
     // @ts-ignore
