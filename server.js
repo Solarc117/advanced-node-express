@@ -7,9 +7,6 @@ const express = require('express'),
   fccTesting = require('./freeCodeCamp/fcctesting'),
   session = require('express-session'),
   passport = require('passport'),
-  ObjectID = require('mongodb').ObjectID,
-  LocalStrategy = require('passport-local'),
-  bcrypt = require('bcrypt'),
   routes = require('./routes'),
   auth = require('./auth')
 
