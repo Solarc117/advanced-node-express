@@ -1,7 +1,12 @@
+'use strict'
+
+require('dotenv').config()
+
 const passport = require('passport'),
   ObjectID = require('mongodb').ObjectID,
   bcrypt = require('bcrypt'),
-  LocalStrategy = require('passport-local')
+  LocalStrategy = require('passport-local'),
+  GitHubStrategy = require('passport-github').Strategy
 
 module.exports = function (app, myDataBase) {
   // @ts-ignore
@@ -11,6 +16,7 @@ module.exports = function (app, myDataBase) {
       err ? console.error(err) : done(null, doc)
     )
   )
+
   passport.use(
     // @ts-ignore
     new LocalStrategy((username, password, done) =>
@@ -23,6 +29,20 @@ module.exports = function (app, myDataBase) {
           ? done(null, false)
           : done(null, user)
       })
+    )
+  )
+
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL:
+          'https://solarc117-fcc-adv-node-express.herokuapp.com/auth/github/callback',
+      },
+      (accessToken, refreshToken, profile, cb) => {
+        console.log(profile)
+      }
     )
   )
 }
