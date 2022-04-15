@@ -2,11 +2,6 @@ const passport = require('passport'),
   bcrypt = require('bcrypt')
 
 module.exports = function (app, myDataBase) {
-  function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) next()
-    else res.redirect('/')
-  }
-
   app.route('/').get((req, res) =>
     res.render('pug', {
       title: 'Connected to Database',
@@ -65,4 +60,11 @@ module.exports = function (app, myDataBase) {
         res.redirect('/profile')
       )
     )
+
+  app.use((req, res, next) => res.status(404).type('text').send('Not Found'))
+}
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) next()
+  else res.redirect('/')
 }
