@@ -1,7 +1,4 @@
 'use strict'
-
-require('dotenv').config()
-
 const passport = require('passport'),
   ObjectID = require('mongodb').ObjectID,
   bcrypt = require('bcrypt'),
@@ -12,8 +9,8 @@ module.exports = function (app, myDataBase) {
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser((id, done) =>
-    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) =>
-      err ? console.error(err) : done(null, doc)
+    myDataBase.findOne({ _id: new ObjectID(id) }, (err, user) =>
+      err ? console.error(err) : done(null, user)
     )
   )
 
@@ -65,7 +62,7 @@ module.exports = function (app, myDataBase) {
             },
           },
           { upsert: true, new: true },
-          (err, doc) => cb(null, doc.value)
+          (err, user) => cb(null, user.value)
         )
       }
     )
