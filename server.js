@@ -6,7 +6,8 @@ const express = require('express'),
   session = require('express-session'),
   passport = require('passport'),
   ObjectID = require('mongodb').ObjectID,
-  LocalStrategy = require('passport-local')
+  LocalStrategy = require('passport-local'),
+  bcrypt = require('bcrypt')
 
 const app = express()
 app.set('view engine', 'pug')
@@ -64,7 +65,8 @@ myDB(async client => {
 
   app.route('/register').post(
     (req, res, next) => {
-      const { username, password } = req.body
+      const { username, password } = req.body,
+        hash = bcrypt.hashSync(password, 12)
       // The logic of the registration route should be as follows: Register the new user > Authenticate the new user > Redirect to /profile
 
       // The logic of step 1, registering the new user, should be as follows:
@@ -76,7 +78,7 @@ myDB(async client => {
           ? next(err)
           : existingUser
           ? res.redirect('/')
-          : myDataBase.insertOne({ username, password }, (err, newUser) =>
+          : myDataBase.insertOne({ username, password: hash }, (err, newUser) =>
               // @ts-ignore
               err ? res.redirect('/') : next(null, newUser.ops[0])
             )
@@ -103,7 +105,7 @@ myDB(async client => {
 
         return err
           ? done(err)
-          : !user || password !== user.password
+          : !user || !bcrypt.compareSync(password, user.password)
           ? done(null, false)
           : done(null, user)
       })
