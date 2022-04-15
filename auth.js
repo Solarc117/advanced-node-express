@@ -1,6 +1,7 @@
 const passport = require('passport'),
   ObjectID = require('mongodb').ObjectID,
-  bcrypt = require('bcrypt')
+  bcrypt = require('bcrypt'),
+  LocalStrategy = require('passport-local')
 
 module.exports = function (app, myDataBase) {
   // @ts-ignore
