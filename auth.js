@@ -19,10 +19,11 @@ module.exports = function (app, myDataBase) {
     new LocalStrategy((username, password, done) =>
       myDataBase.findOne({ username }, (err, user) => {
         console.log(`User ${username} attempted to log in.`)
+        const hash = bcrypt.hashSync(user.password, 12)
 
         return err
           ? done(err)
-          : !user || !bcrypt.compareSync(password, user.password)
+          : !user || !bcrypt.compareSync(password, hash)
           ? done(null, false)
           : done(null, user)
       })
