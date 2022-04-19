@@ -16,16 +16,23 @@ module.exports = function (app, myDataBase) {
 
   passport.use(
     // @ts-ignore
-    new LocalStrategy((username, password, done) =>
-      myDataBase.findOne({ username }, (err, user) => {
-        console.log(`User ${username} attempted to log in.`)
-        const hash = bcrypt.hashSync(user.password, 12)
+    new LocalStrategy((usernameInput, passwordInput, done) =>
+      myDataBase.findOne({ username: usernameInput }, (err, user) => {
+        console.log(`User ${usernameInput} attempted to log in.`)
 
-        return err
-          ? done(err)
-          : !user || !bcrypt.compareSync(password, hash)
-          ? done(null, false)
-          : done(null, user)
+        const [loginMessage, doneParams] = err
+          ? [[`Could not search db for user ${usernameInput}:`, err], [err]]
+          : !user
+          ? [
+              [`Could not find a user with username ${usernameInput}`],
+              [null, false],
+            ]
+          : !bcrypt.compareSync(passwordInput, user.password)
+          ? [['Password is incorrect'], [null, false]]
+          : [[`Successfully logged in ${usernameInput}`], [null, user]]
+
+        console.log(...loginMessage)
+        return done(...doneParams)
       })
     )
   )
@@ -39,21 +46,25 @@ module.exports = function (app, myDataBase) {
           'https://solarc117-fcc-adv-node-express.herokuapp.com/auth/github/callback',
       },
       (accessToken, refreshToken, profile, cb) => {
-        console.log(profile)
+        const { id, displayName, photos, emails, provider } = profile
+        console.log('accessToken:', accessToken)
+        console.log('refreshToken:', refreshToken)
+        console.log('profile:', profile)
+        console.log('cb:', cb)
 
         myDataBase.findOneAndUpdate(
-          { id: profile.id },
-          {},
+          { id: id },
+          // 🤔 One thing that confuses me currently (though I won't edit it yet) is why the object in setOnInsert doesn't match the format of our local strat, which simply contains a username and a hashed passw. Seems like bad practice.
           {
             $setOnInsert: {
-              id: profile.id,
-              name: profile.displayName || 'John Doe',
-              photo: profile.photos[0].value || '',
-              email: Array.isArray(profile.emails)
-                ? profile.emails[0].value
+              id: id,
+              name: displayName || 'John Doe',
+              photo: photos[0].value || '',
+              email: Array.isArray(emails)
+                ? emails[0].value
                 : 'No public email',
               created_on: new Date(),
-              provider: profile.provider || '',
+              provider: provider || '',
             },
             $set: {
               last_login: new Date(),
@@ -63,7 +74,12 @@ module.exports = function (app, myDataBase) {
             },
           },
           { upsert: true, new: true },
-          (err, user) => cb(null, user.value)
+          (err, user) => {
+            console.log('err:', err)
+            console.log('result:', user)
+
+            return cb(null, user.value)
+          }
         )
       }
     )
