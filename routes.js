@@ -29,7 +29,6 @@ module.exports = function (app, myDataBase) {
 
   app.route('/profile').get(ensureAuthenticated, (req, res) => {
     const { username } = req.user
-    log(`GET /profile`)
 
     res.render(process.cwd() + '/views/pug/profile', {
       username,
