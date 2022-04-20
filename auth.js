@@ -5,6 +5,10 @@ const passport = require('passport'),
   LocalStrategy = require('passport-local'),
   GitHubStrategy = require('passport-github').Strategy
 
+function log() {
+  console.log(...arguments)
+}
+
 module.exports = function (app, myDataBase) {
   // @ts-ignore
   passport.serializeUser((user, done) => done(null, user._id))
@@ -18,7 +22,7 @@ module.exports = function (app, myDataBase) {
     // @ts-ignore
     new LocalStrategy((usernameInput, passwordInput, done) =>
       myDataBase.findOne({ username: usernameInput }, (err, user) => {
-        console.log(`User ${usernameInput} attempted to log in.`)
+        log(`User ${usernameInput} attempted to log in.`)
 
         const [loginMessage, doneParams] = err
           ? [[`Could not search db for user ${usernameInput}:`, err], [err]]
@@ -31,7 +35,7 @@ module.exports = function (app, myDataBase) {
           ? [['Password is incorrect'], [null, false]]
           : [[`Successfully logged in ${usernameInput}`], [null, user]]
 
-        console.log(...loginMessage)
+        log(...loginMessage)
         return done(...doneParams)
       })
     )
@@ -47,18 +51,14 @@ module.exports = function (app, myDataBase) {
       },
       (accessToken, refreshToken, profile, cb) => {
         const { id, displayName, photos, emails, provider } = profile
-        console.log('accessToken:', accessToken)
-        console.log('refreshToken:', refreshToken)
-        console.log('profile:', profile)
-        console.log('cb:', cb)
 
         myDataBase.findOneAndUpdate(
           { id: id },
-          // 🤔 One thing that confuses me currently (though I won't edit it yet) is why the object in setOnInsert doesn't match the format of our local strat, which simply contains a username and a hashed passw. Seems like bad practice.
+          // 🤔 One thing that confuses me currently (though I won't edit it yet) is why the object in setOnInsert doesn't match the format of our local strat, which simply contains a username and a hashed passw. Seems like bad practice. I ONLY EDITED THE NAME PROP TO BE USERNAME INSTEAD.
           {
             $setOnInsert: {
               id: id,
-              name: displayName || 'John Doe',
+              username: displayName || 'John Doe',
               photo: photos[0].value || '',
               email: Array.isArray(emails)
                 ? emails[0].value
@@ -74,12 +74,7 @@ module.exports = function (app, myDataBase) {
             },
           },
           { upsert: true, new: true },
-          (err, user) => {
-            console.log('err:', err)
-            console.log('result:', user)
-
-            return cb(null, user.value)
-          }
+          (err, user) => cb(null, user.value)
         )
       }
     )
