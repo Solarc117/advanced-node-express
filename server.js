@@ -13,6 +13,10 @@ const express = require('express'),
 const app = express()
 app.set('view engine', 'pug')
 
+const http = require('http').createServer(app),
+  // @ts-ignore
+  io = require('socket.io')(http)
+
 fccTesting(app) // For FCC testing purposes.
 app.use('/public', express.static(process.cwd() + '/public'))
 app.use(express.json())
@@ -33,6 +37,8 @@ myDB(async client => {
 
   routes(app, myDataBase)
   auth(app, myDataBase)
+
+  io.on('connection', socket => console.log('A user has connected!'))
 }).catch(err =>
   app.get('/', (req, res) =>
     res.render('pug', { title: err, message: 'Unable to login' })
@@ -40,4 +46,4 @@ myDB(async client => {
 )
 
 const PORT = process.env.PORT || 3000
-app.listen(PORT, () => console.log('Listening on port ' + PORT))
+http.listen(PORT, () => console.log('Listening on port ' + PORT))
