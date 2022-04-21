@@ -15,7 +15,7 @@ div > input {
 }
 
 .login {
-  border: solid 2px #777;
+  border: solid 2px hsl(0, 0%, 47%);
   width: 50%;
   background-color: aliceblue;
 }
@@ -31,8 +31,8 @@ form {
 }
 
 form input {
-  background-color: #eee;
-  border: green solid 2px;
+  background-color: hsl(0, 0%, 93%);
+  border: hsl(120, 100%, 25%) solid 2px;
   padding: 10px; 
   width: 90%; 
   margin-right: .5%;
@@ -40,7 +40,7 @@ form input {
 
 form button { 
   width: 9%;
-  background: rgb(130, 224, 255);
+  background: hsl(195, 100%, 75%);
   border: none; 
   padding: 10px; 
 }
@@ -60,5 +60,5 @@ form button {
 }
 
 #messages li:nth-child(odd) { 
-  background: #eee;
+  background: hsl(0, 0%, 93%);
 }
