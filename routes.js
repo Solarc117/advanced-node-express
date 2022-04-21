@@ -16,17 +16,6 @@ module.exports = function (app, myDataBase) {
     })
   )
 
-  app.route('/login').post(
-    passport.authenticate('local', {
-      failureRedirect: '/',
-      failureMessage: true,
-    }),
-    (req, res) => {
-      log(`Redirecting ${req.user.username} to /profile...`)
-      res.redirect('/profile')
-    }
-  )
-
   app.route('/profile').get(ensureAuthenticated, (req, res) => {
     const { username } = req.user
 
@@ -42,6 +31,36 @@ module.exports = function (app, myDataBase) {
     req.logout()
     res.redirect('/')
   })
+
+  app.route('/chat').get(ensureAuthenticated, (req, res) => {
+    const { user } = req
+
+    res.render('pug/chat', { user })
+  })
+
+  app.route('/auth/github').get(passport.authenticate('github'))
+
+  app.route('/auth/github/callback').get(
+    passport.authenticate('github', {
+      failureRedirect: '/',
+      failureMessage: true,
+    }),
+    (req, res) => {
+      req.session.user_id = req.user.id
+      res.redirect('/chat')
+    }
+  )
+
+  app.route('/login').post(
+    passport.authenticate('local', {
+      failureRedirect: '/',
+      failureMessage: true,
+    }),
+    (req, res) => {
+      log(`Redirecting ${req.user.username} to /profile...`)
+      res.redirect('/profile')
+    }
+  )
 
   app.route('/register').post(
     (req, res, next) => {
@@ -88,20 +107,11 @@ module.exports = function (app, myDataBase) {
     }
   )
 
-  app.route('/auth/github').get(passport.authenticate('github'))
-
-  app.route('/auth/github/callback').get(
-    passport.authenticate('github', {
-      failureRedirect: '/',
-      failureMessage: true,
-    }),
-    (req, res) => res.redirect('/profile')
-  )
-
   app.use((req, res, next) => res.status(404).type('text').send('Not Found'))
 }
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) next()
-  else res.redirect('/')
+  if (req.isAuthenticated()) return next()
+
+  res.redirect('/')
 }
