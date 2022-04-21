@@ -54,24 +54,30 @@ app.use(passport.session())
 
 myDB(async client => {
   let currentUsers = 0,
-    emitUsers = () => io.emit('user count', currentUsers),
     myDataBase = await client.db('database').collection('users')
 
   routes(app, myDataBase)
   auth(app, myDataBase)
 
   io.on('connection', socket => {
-    const { username } = socket.request.user
+    const { username: name } = socket.request.user,
+      /**
+       * @description Updates currentUsers count.
+       * @param {boolean} isConnecting Whether the user is connecting or disconnecting.
+       */
+      emitUser = isConnecting => {
+        log(`user ${name} ${isConnecting ? 'connected' : 'disconnected'}`)
+        isConnecting ? currentUsers++ : currentUsers--
 
-    log(`user ${username} connected`)
-    currentUsers++
-    emitUsers()
-
-    socket.on('disconnect', () => {
-      log('user disconnected')
-      currentUsers--
-      emitUsers()
-    })
+        io.emit('user', {
+          name,
+          currentUsers,
+          connected: isConnecting,
+        })
+      }
+    
+    emitUser(true)
+    socket.on('disconnect', () => emitUser(false))
   })
 }).catch(err =>
   app
