@@ -44,7 +44,6 @@ myDB(async client => {
   io.on('connection', socket => {
     currentUsers++
     io.emit('user count', currentUsers)
-    socket.on('user count', data => log(data))
   })
 }).catch(err =>
   app.get('/', (req, res) =>
