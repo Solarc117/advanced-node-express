@@ -17,7 +17,9 @@ const http = require('http').createServer(app),
   // @ts-ignore
   io = require('socket.io')(http)
 
-function log() { console.log(...arguments) }
+function log() {
+  console.log(...arguments)
+}
 
 fccTesting(app) // For FCC testing purposes.
 app.use('/public', express.static(process.cwd() + '/public'))
@@ -41,9 +43,19 @@ myDB(async client => {
   auth(app, myDataBase)
 
   let currentUsers = 0
+  function emitUsers() {
+    io.emit('user count'), currentUsers
+  }
   io.on('connection', socket => {
+    log('A user has connected')
     currentUsers++
-    io.emit('user count', currentUsers)
+    emitUsers()
+
+    socket.on('disconnect', () => {
+      log('A user has disconnected')
+      currentUsers--
+      emitUsers()
+    })
   })
 }).catch(err =>
   app.get('/', (req, res) =>
