@@ -17,6 +17,8 @@ const http = require('http').createServer(app),
   // @ts-ignore
   io = require('socket.io')(http)
 
+function log() { console.log(...arguments) }
+
 fccTesting(app) // For FCC testing purposes.
 app.use('/public', express.static(process.cwd() + '/public'))
 app.use(express.json())
@@ -38,7 +40,12 @@ myDB(async client => {
   routes(app, myDataBase)
   auth(app, myDataBase)
 
-  io.on('connection', socket => console.log('A user has connected!'))
+  let currentUsers = 0
+  io.on('connection', socket => {
+    currentUsers++
+    io.emit('user count', currentUsers)
+    socket.on('user count', data => log(data))
+  })
 }).catch(err =>
   app.get('/', (req, res) =>
     res.render('pug', { title: err, message: 'Unable to login' })
@@ -46,4 +53,4 @@ myDB(async client => {
 )
 
 const PORT = process.env.PORT || 3000
-http.listen(PORT, () => console.log('Listening on port ' + PORT))
+http.listen(PORT, () => log('Listening on port ' + PORT))
