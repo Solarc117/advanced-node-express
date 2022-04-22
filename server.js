@@ -75,9 +75,12 @@ myDB(async client => {
           connected: isConnecting,
         })
       }
-    
+
     emitUser(true)
     socket.on('disconnect', () => emitUser(false))
+    socket.on('chat message', message =>
+      io.emit('chat message', { name, message })
+    )
   })
 }).catch(err =>
   app
